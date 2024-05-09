@@ -11,6 +11,9 @@ rate = engine.setProperty("rate",170)
 def autonomous():
     call(['python','autonomous/1.py'])
 
+def remotemonitor():
+    call(['python','remotemonitor/app.py'])
+
 def speak(audio):
     engine.say(audio)
     engine.runAndWait()
@@ -38,45 +41,55 @@ if __name__ == "__main__":
     speak('This Wheelchair contains autonomous navigation, object detection and avoidance, remote monitoring, fall detection and other numerous features')
     speak('You can access these features by saying the following commands:')
     speak('say navigate to start autonomous movement')
+    speak('say remote monitoring to start remote monitoring')
 
     speak('or you can say hello to interact with wheelchair')
 
+    while True:
+        query = takeCommand().lower(),
 
-    query = takeCommand().lower(),
-
-    if 'navigate' in query:
-        autonomous()
-    elif "hello" in query:
-        from GreetMe import greetMe
-        greetMe()
+        if 'navigate' in query:
+            speak('Autonomous mode activated')
+            autonomous()
+        elif 'remote monitor' in query:
+            speak('Remote monitoring activated')
+            remotemonitor()
+        elif "hello" in query:
+            from GreetMe import greetMe
+            greetMe()
     
-        while True:
-            query = takeCommand().lower()
-            if "go to sleep" in query :
-                speak("Ok sir! You can call me anytime")
-                break
-            elif "hello" in query:
-                speak("Hello sir, how are you?")
-            elif "i am fine" in query:
-                speak("that's great sir")
-            elif "how are you" in query:
-                speak("Perfect, sir")
-            elif "thank you" in query:
-                speak("you are welcome, sir")
-            elif "navigate" in query:
-                autonomous()
-                break
-            elif "google" in query:
-                from SearchNow import searchGoogle
+            while True:
+                query = takeCommand().lower()
+                if "go to sleep" in query :
+                    speak("Ok sir! You can call me anytime")
+                    break
+                elif "hello" in query:
+                    speak("Hello sir, how are you?")
+                elif "i am fine" in query:
+                    speak("that's great sir")
+                elif "remote monitor":
+                    speak('remote monitoring activated')
+                    remotemonitor()
+                    break
+                elif "how are you" in query:
+                    speak("Perfect, sir")
+                elif "thank you" in query:
+                    speak("you are welcome, sir")
+                elif "navigate" in query:
+                    speak('Autonomous mode activated')
+                    autonomous()
+                    break
+                elif "google" in query:
+                    from SearchNow import searchGoogle
     
-                searchGoogle(query)
-            elif "youtube" in query:
-                from SearchNow import searchYoutube
+                    searchGoogle(query)
+                elif "youtube" in query:
+                    from SearchNow import searchYoutube
     
-                searchYoutube(query)
-            elif "wikipedia" in query:
-                from SearchNow import searchWikipedia
+                    searchYoutube(query)
+                elif "wikipedia" in query:
+                    from SearchNow import searchWikipedia
     
-                searchWikipedia(query)
+                    searchWikipedia(query)
         
 
