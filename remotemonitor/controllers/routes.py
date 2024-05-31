@@ -8,7 +8,7 @@ def get_blueprint():
     return REQUEST_API
 
 def gen(webcam):
-    capture=cv2.VideoCapture(0)
+    capture=cv2.VideoCapture(0,cv2.CAP_DSHOW)
     if not capture:
         raise Exception('error accessing the webcam')
     while True:

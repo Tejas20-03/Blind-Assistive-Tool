@@ -10,7 +10,7 @@ def make_chunks(EdgeArray, size_of_chunk):
     return chunks
 
 def main():
-    cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+    cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
     StepSize = 5
 
     while True:

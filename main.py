@@ -67,7 +67,7 @@ if __name__ == "__main__":
                     speak("Hello sir, how are you?")
                 elif "i am fine" in query:
                     speak("that's great sir")
-                elif "remote monitor":
+                elif "remote monitor" in query:
                     speak('remote monitoring activated')
                     remotemonitor()
                     break
@@ -75,10 +75,6 @@ if __name__ == "__main__":
                     speak("Perfect, sir")
                 elif "thank you" in query:
                     speak("you are welcome, sir")
-                elif "navigate" in query:
-                    speak('Autonomous mode activated')
-                    autonomous()
-                    break
                 elif "google" in query:
                     from SearchNow import searchGoogle
     
