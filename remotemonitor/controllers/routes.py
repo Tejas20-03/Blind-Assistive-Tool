@@ -18,7 +18,7 @@ def gen(webcam):
             b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n'
         )
         
-@REQUEST_API.route('/stream')
+@REQUEST_API.route('/')
 def monitoring():
     try:
         webcam=WebCam()

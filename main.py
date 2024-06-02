@@ -6,7 +6,7 @@ engine = pyttsx3.init("sapi5")
 voices = engine.getProperty("voices")
 engine.setProperty("voice", voices[0].id)
 
-rate = engine.setProperty("rate",170)
+rate = engine.setProperty("rate",180)
 
 def autonomous():
     call(['python','autonomous/1.py'])
@@ -21,29 +21,29 @@ def speak(audio):
 def takeCommand():
     r = speech_recognition.Recognizer()
     with speech_recognition.Microphone() as source:
-        print("Listening.....")
+        speak("Listening.....")
         r.pause_threshold = 1
         r.energy_threshold = 500
         audio = r.listen(source,0,4)
     try:
-        print("Understanding..")
+        speak("Understanding..")
         query = r.recognize_google(audio, language="en-IN")
         print(f"You Said:{query}\n")
     except Exception as e:
-        print("Say that again")
+        speak("Say that again")
         return ""
     return query
 
 if __name__ == "__main__":
-    speak('Welcome to Autonomous Wheelchair')
+    speak('Welcome to Beyond Vision')
     speak('Guided by Innovation, Driven by Independence')
 
-    speak('This Wheelchair contains autonomous navigation, object detection and avoidance, remote monitoring, fall detection and other numerous features')
+    speak('This Smart Glasses contains features like navigation, object detection and avoidance, remote monitoring, currency detection and other numerous features')
     speak('You can access these features by saying the following commands:')
     speak('say navigate to start autonomous movement')
     speak('say remote monitoring to start remote monitoring')
 
-    speak('or you can say hello to interact with wheelchair')
+    speak('or you can say hello to interact with Glasses')
 
     while True:
         query = takeCommand().lower(),
