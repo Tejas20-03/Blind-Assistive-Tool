@@ -2,6 +2,18 @@ import math
 import os
 import time
 
+import pyttsx3
+import datetime
+
+engine = pyttsx3.init("sapi5")
+voices = engine.getProperty("voices")
+engine.setProperty("voice", voices[0].id)
+engine.setProperty("rate",200)
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+
 
 import cv2
 from imutils.video import FPS
@@ -46,10 +58,10 @@ class Detector:
         """[Starts Sampling and Video Capture]
         """
         start = time.time()
-        print('Started Sampling')
+        speak('Currency Detection Started Sampling')
         self.getSampleData()
         end = time.time()
-        print('Done sampling :', end-start)
+        speak('Currency Detection Done Sampling')
         self.videoCapture = Stream(src=0).start()
         self.fps = FPS().start()
 
