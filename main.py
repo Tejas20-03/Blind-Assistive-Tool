@@ -1,38 +1,42 @@
 import pyttsx3
-import speech_recognition
+import speech_recognition as sr
 from subprocess import call
+import sys
+import os
 
+# Text-to-speech engine setup
 engine = pyttsx3.init("sapi5")
 voices = engine.getProperty("voices")
 engine.setProperty("voice", voices[0].id)
-
-rate = engine.setProperty("rate",180)
+engine.setProperty("rate", 180)
 
 def autonomous():
-    call(['python','autonomous/1.py'])
+    python_executable = sys.executable
+    call([python_executable, os.path.join('autonomous', '1.py')])
 
 def remotemonitor():
-    call(['python','remotemonitor/app.py'])
+    python_executable = sys.executable
+    call([python_executable, os.path.join('remotemonitor', 'app.py')])
 
 def speak(audio):
     engine.say(audio)
     engine.runAndWait()
-#
+
 def takeCommand():
-    r = speech_recognition.Recognizer()
-    with speech_recognition.Microphone() as source:
-        speak("Listening.....")
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        speak("Listening...")
         r.pause_threshold = 1
         r.energy_threshold = 500
-        audio = r.listen(source,0,4)
+        audio = r.listen(source, 0, 4)
     try:
-        speak("Understanding..")
+        speak("Understanding...")
         query = r.recognize_google(audio, language="en-IN")
-        print(f"You Said:{query}\n")
+        print(f"You Said: {query}\n")
     except Exception as e:
         speak("Say that again")
         return ""
-    return query
+    return query.lower()
 
 if __name__ == "__main__":
     speak('Welcome to Beyond Vision')
@@ -46,7 +50,7 @@ if __name__ == "__main__":
     speak('or you can say hello to interact with Glasses')
 
     while True:
-        query = takeCommand().lower(),
+        query = takeCommand()
 
         if 'navigate' in query:
             speak('Autonomous mode activated')
@@ -59,33 +63,28 @@ if __name__ == "__main__":
             greetMe()
     
             while True:
-                query = takeCommand().lower()
-                if "go to sleep" in query :
+                query = takeCommand()
+                if "go to sleep" in query:
                     speak("Ok sir! You can call me anytime")
                     break
                 elif "hello" in query:
                     speak("Hello sir, how are you?")
                 elif "i am fine" in query:
-                    speak("that's great sir")
+                    speak("That's great sir")
                 elif "remote monitor" in query:
-                    speak('remote monitoring activated')
+                    speak('Remote monitoring activated')
                     remotemonitor()
                     break
                 elif "how are you" in query:
                     speak("Perfect, sir")
                 elif "thank you" in query:
-                    speak("you are welcome, sir")
+                    speak("You are welcome, sir")
                 elif "google" in query:
                     from SearchNow import searchGoogle
-    
                     searchGoogle(query)
                 elif "youtube" in query:
                     from SearchNow import searchYoutube
-    
                     searchYoutube(query)
                 elif "wikipedia" in query:
                     from SearchNow import searchWikipedia
-    
                     searchWikipedia(query)
-        
-

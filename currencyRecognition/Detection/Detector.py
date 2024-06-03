@@ -198,7 +198,5 @@ class Detector:
         """[Exits the Currency Detector]
         """
         self.fps.stop()
-        print("[INFO] elasped time: {:.2f}".format(self.fps.elapsed()))
-        print("[INFO] approx. FPS: {:.2f}".format(self.fps.fps()))
         self.videoCapture.stop()
         cv2.destroyAllWindows()
