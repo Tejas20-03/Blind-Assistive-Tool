@@ -70,8 +70,7 @@ def take_command():
     return query.lower()
 
 if __name__ == "__main__":
-    speak('Welcome to Beyond Vision')
-    speak('Guided by Innovation, Driven by Independence')
+    speak('Say capture to detect the surrounding')
     
     try:
         while True:

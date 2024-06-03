@@ -17,6 +17,18 @@ def autonomous():
 def remotemonitor():
     python_executable = sys.executable
     call([python_executable, os.path.join('remotemonitor', 'app.py')])
+    
+def imagetotext():
+    python_executable = sys.executable
+    call([python_executable, os.path.join('imgtotext', 'main.py')])
+
+def currencyRecognition():
+    python_executable = sys.executable
+    call([python_executable, os.path.join('currencyRecognition', 'main.py')])
+    
+def sceneDetection():
+    python_executable = sys.executable
+    call([python_executable, os.path.join('sceneDetection', 'main.py')])
 
 def speak(audio):
     engine.say(audio)
@@ -40,7 +52,7 @@ def takeCommand():
 
 if __name__ == "__main__":
     speak('Welcome to Beyond Vision')
-    speak('Guided by Innovation, Driven by Independence')
+    speak('An Assistive tool for Blind Persons')
 
     speak('This Smart Glasses contains features like navigation, object detection and avoidance, remote monitoring, currency detection and other numerous features')
     speak('You can access these features by saying the following commands:')
@@ -58,6 +70,14 @@ if __name__ == "__main__":
         elif 'remote monitor' in query:
             speak('Remote monitoring activated')
             remotemonitor()
+        elif 'detect currency' in query:
+            speak("Currency Detection Activated")
+            currencyRecognition()
+            
+        elif 'read text' in query:
+            speak('Text Reader Activated')
+            imagetotext()
+            
         elif "hello" in query:
             from GreetMe import greetMe
             greetMe()
@@ -71,10 +91,6 @@ if __name__ == "__main__":
                     speak("Hello sir, how are you?")
                 elif "i am fine" in query:
                     speak("That's great sir")
-                elif "remote monitor" in query:
-                    speak('Remote monitoring activated')
-                    remotemonitor()
-                    break
                 elif "how are you" in query:
                     speak("Perfect, sir")
                 elif "thank you" in query:

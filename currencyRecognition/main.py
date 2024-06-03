@@ -41,13 +41,14 @@ detect_obj = Detector()
 detect_obj.start()
 
 try:
+    speak("Say detect currency to detect the currency in front of you")
     while True:
         query = takeCommand()
         if "detect currency" in query:
             try:
                 detect_obj.detect()
-                print("[INFO] Detected Currency: {}".format(detect_obj.detectedCurrency))
-                print("[INFO] Matching Points: {}".format(detect_obj.maxMatching))
+                speak("Detected Currency: {}".format(detect_obj.detectedCurrency))
+                print("Matching Points: {}".format(detect_obj.maxMatching))
             except KeyboardInterrupt:
                 detect_obj.stop()
         elif "exit" in query:
@@ -57,4 +58,3 @@ finally:
     detect_obj.stop()
     chatbot()
 
-speak("Program exited successfully")

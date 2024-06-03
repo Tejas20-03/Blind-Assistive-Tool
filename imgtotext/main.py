@@ -2,6 +2,9 @@ import cv2
 import pyttsx3
 import speech_recognition as sr
 import pytesseract
+from subprocess import call
+import sys
+import os
 
 # Text-to-speech engine setup
 engine = pyttsx3.init("sapi5")
@@ -41,6 +44,10 @@ def take_command():
         return ""
     return query.lower()
 
+def chatbot():
+    python_executable = sys.executable  # Get the path to the current Python interpreter
+    call([python_executable, os.path.join('..', 'main.py')])
+
 def read_text_from_image(img_path):
     # Read the image
     img = cv2.imread(img_path)
@@ -64,20 +71,21 @@ def read_text_from_image(img_path):
     return text
 
 if __name__ == "__main__":
-    speak('Welcome to Beyond Vision')
-    speak('Guided by Innovation, Driven by Independence')
+    speak('Say Read Content to read the content')
     
-    while True:
-        query = take_command().lower()
+    try:
+        while True:
+            query = take_command().lower()
 
-        if 'read content' in query:
-            img_path = capture_image()
-            speak('Image captured, analyzing...')
-            text = read_text_from_image(img_path)
-            speak('The text in the document is:')
-            speak(text)
-        elif 'exit' in query:
-            speak('Exiting program')
-            break
+            if 'read content' in query:
+                img_path = capture_image()
+                speak('Image captured, analyzing...')
+                text = read_text_from_image(img_path)
+                speak('The text in the document is:')
+                speak(text)
+            elif 'exit' in query:
+                speak('Exiting program')
+                break
 
-    speak("Program exited successfully")
+    finally:
+        chatbot()
