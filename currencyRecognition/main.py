@@ -9,7 +9,7 @@ import os
 # Text-to-speech engine setup
 engine = pyttsx3.init("sapi5")
 voices = engine.getProperty("voices")
-engine.setProperty("voice", voices[0].id)
+engine.setProperty("voice", voices[1].id)
 engine.setProperty("rate", 200)
 
 def chatbot():
@@ -47,8 +47,8 @@ try:
         if "detect currency" in query:
             try:
                 detect_obj.detect()
-                speak("Detected Currency: {}".format(detect_obj.detectedCurrency))
-                print("Matching Points: {}".format(detect_obj.maxMatching))
+                speak("Detected Currency: {} Rupees".format(detect_obj.detectedCurrency))
+                speak("Matching Points: {}".format(detect_obj.maxMatching))
             except KeyboardInterrupt:
                 detect_obj.stop()
         elif "exit" in query:

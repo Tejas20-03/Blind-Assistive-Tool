@@ -2,7 +2,7 @@ import cv2
 from threading import Thread, Lock
 
 class Stream:
-    def __init__(self, src=0):
+    def __init__(self, src=1):
         # Initialize the video camera stream and read the first frame from the stream
         self.stream = cv2.VideoCapture(src)
         (self.grabbed, self.frame) = self.stream.read()

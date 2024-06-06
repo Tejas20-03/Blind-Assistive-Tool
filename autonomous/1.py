@@ -1,5 +1,20 @@
 import numpy as np
 import cv2
+import pyttsx3  # Ensure you have this package installed
+
+# Text-to-speech engine setup
+engine = pyttsx3.init("sapi5")
+voices = engine.getProperty("voices")
+engine.setProperty("voice", voices[1].id)
+engine.setProperty("rate", 200)
+
+def chatbot():
+    python_executable = sys.executable  # Get the path to the current Python interpreter
+    call([python_executable, os.path.join('..', 'main.py')])
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
 
 testmode = 1  # To display images to verify. Set to zero if not interested in displaying images.
 
@@ -10,8 +25,9 @@ def make_chunks(EdgeArray, size_of_chunk):
     return chunks
 
 def main():
-    cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     StepSize = 5
+    last_command = ""  # Variable to keep track of the last spoken command
 
     while True:
         _, frame = cap.read()
@@ -78,6 +94,10 @@ def main():
                 direction = "Move right"
         else:
             direction = "Move forward"
+
+        if direction != last_command:
+            speak(direction)
+            last_command = direction  # Update the last command
 
         if testmode == 1:
             cv2.imshow("Original_Frame", original_frame)

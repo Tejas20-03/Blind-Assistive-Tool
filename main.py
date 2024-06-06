@@ -7,7 +7,7 @@ import os
 # Text-to-speech engine setup
 engine = pyttsx3.init("sapi5")
 voices = engine.getProperty("voices")
-engine.setProperty("voice", voices[0].id)
+engine.setProperty("voice", voices[1].id)
 engine.setProperty("rate", 180)
 
 def autonomous():
@@ -51,6 +51,7 @@ def takeCommand():
     return query.lower()
 
 if __name__ == "__main__":
+    currencyRecognition()
     speak('Welcome to Beyond Vision')
     speak('An Assistive tool for Blind Persons')
 
@@ -58,7 +59,9 @@ if __name__ == "__main__":
     speak('You can access these features by saying the following commands:')
     speak('say navigate to start autonomous movement')
     speak('say remote monitoring to start remote monitoring')
-
+    speak('say detect currency to identify the currency')
+    speak('say detect surrounding to detect the objects in front of you')
+ 
     speak('or you can say hello to interact with Glasses')
 
     while True:
@@ -77,6 +80,10 @@ if __name__ == "__main__":
         elif 'read text' in query:
             speak('Text Reader Activated')
             imagetotext()
+        
+        elif 'detect surrounding' in query:
+            speak('Scene Detection activated')
+            sceneDetection()
             
         elif "hello" in query:
             from GreetMe import greetMe

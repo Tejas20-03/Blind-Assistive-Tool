@@ -9,12 +9,12 @@ import os
 # Text-to-speech engine setup
 engine = pyttsx3.init("sapi5")
 voices = engine.getProperty("voices")
-engine.setProperty("voice", voices[0].id)
-engine.setProperty("rate", 180)
+engine.setProperty("voice", voices[1].id)
+engine.setProperty("rate", 150)
 
 def capture_image():
     # Open the webcam
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
     ret, frame = cap.read()
     if ret:
         # Save the captured image
@@ -82,7 +82,7 @@ if __name__ == "__main__":
                 speak('Image captured, analyzing...')
                 text = read_text_from_image(img_path)
                 speak('The text in the document is:')
-                speak(text)
+                speak('WE ARE THE STUDENTS OF AIML... OBVIOUSLY OUR BRANCH IS BETTER THAN CSE')
             elif 'exit' in query:
                 speak('Exiting program')
                 break
