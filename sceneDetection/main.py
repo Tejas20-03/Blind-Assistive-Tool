@@ -11,7 +11,7 @@ import os
 # Text-to-speech engine setup
 engine = pyttsx3.init("sapi5")
 voices = engine.getProperty("voices")
-engine.setProperty("voice", voices[0].id)
+engine.setProperty("voice", voices[1].id)
 engine.setProperty("rate", 180)
 
 # Load the pre-trained VGG16 model
@@ -24,7 +24,7 @@ def chatbot():
 
 def capture_image():
     # Open the webcam
-    cap = cv2.VideoCapture(1,cv2.CAP_DSHOW)
+    cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
     ret, frame = cap.read()
     if ret:
         # Save the captured image

@@ -1,9 +1,12 @@
 import math
 import os
 import time
-
+import pickle
 import pyttsx3
-import datetime
+import cv2
+from imutils.video import FPS
+from Detection.config import *
+from Detection.Stream import Stream
 
 engine = pyttsx3.init("sapi5")
 voices = engine.getProperty("voices")
@@ -14,23 +17,8 @@ def speak(audio):
     engine.say(audio)
     engine.runAndWait()
 
-
-import cv2
-from imutils.video import FPS
-
-
-from Detection.config import *
-from Detection.Stream import Stream
-
-
 class Detector:
     def __init__(self):
-        """[
-            Samples the dataset and fetches all features in the images then detects the denomination of currency in video stream.
-            Uses ORB to Detect Keypoints and BEBLID to compute the Images.
-            Uses FLANN based Matcher to match the images in video stream.
-            ]
-        """
         self.cache = None
         self.featureExtractor = cv2.ORB_create()
         self.featureExtractorSupport = cv2.xfeatures2d.BEBLID_create(0.80)
@@ -43,102 +31,89 @@ class Detector:
         self.kp = None
         self.des = None
         self.matchesSummary = {}
+        
         index_params = dict(algorithm=6,
-                            table_number=6,
-                            key_size=12,
-                            multi_probe_level=1)
+                          table_number=6,
+                          key_size=12,
+                          multi_probe_level=1)
         search_params = dict(checks=50)
         self.matcher = cv2.FlannBasedMatcher(index_params, search_params)
         
-        
-        # self.matcher = cv2.DescriptorMatcher_create(
-        #     cv2.DescriptorMatcher_BRUTEFORCE_HAMMING)
+        os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
+
+    def __serialize_keypoints(self, keypoints):
+        return [(kp.pt, kp.size, kp.angle, kp.response, kp.octave, kp.class_id) for kp in keypoints]
+
+    def __deserialize_keypoints(self, keypoints_data):
+        return [cv2.KeyPoint(x=data[0][0], y=data[0][1], size=data[1], angle=data[2],
+                            response=data[3], octave=data[4], class_id=data[5]) for data in keypoints_data]
 
     def start(self):
-        """[Starts Sampling and Video Capture]
-        """
-        start = time.time()
-        speak('Currency Detection Started Sampling')
-        self.getSampleData()
-        end = time.time()
-        speak('Currency Detection Done Sampling')
+        if os.path.exists(CACHE_FILE):
+            speak('Loading cached currency features')
+            with open(CACHE_FILE, 'rb') as f:
+                cached_data = pickle.load(f)
+                self.cache = {}
+                for currency, samples in cached_data.items():
+                    self.cache[currency] = []
+                    for sample in samples:
+                        keypoints_data = sample[1][0]
+                        keypoints = self.__deserialize_keypoints(keypoints_data)
+                        self.cache[currency].append([sample[0], (keypoints, sample[1][1])])
+        else:
+            speak('Currency Detection Started Sampling')
+            self.getSampleData()
+            cache_data = {}
+            for currency, samples in self.cache.items():
+                cache_data[currency] = []
+                for sample in samples:
+                    keypoints_data = self.__serialize_keypoints(sample[1][0])
+                    cache_data[currency].append([sample[0], (keypoints_data, sample[1][1])])
+            with open(CACHE_FILE, 'wb') as f:
+                pickle.dump(cache_data, f)
+            speak('Currency Detection Done Sampling')
+            
         self.videoCapture = Stream(src=0).start()
         self.fps = FPS().start()
+        time.sleep(2)  # Allow camera to initialize
 
     def getSampleData(self):
-        """[Samples the images in dataset and stores features and description of each image in a dictionary with key as the currency value]
-        """
         self.cache = {}
         for currencyValue in os.listdir(BASE_DIR):
             data = []
             for currencySampleImageName in os.listdir(BASE_DIR + os.sep + currencyValue):
-                currencyTrainImagePath = BASE_DIR + os.sep + \
-                    currencyValue + os.sep + currencySampleImageName
-                currencyTrainImage = cv2.imread(
-                    currencyTrainImagePath, cv2.IMREAD_GRAYSCALE)
+                currencyTrainImagePath = BASE_DIR + os.sep + currencyValue + os.sep + currencySampleImageName
+                currencyTrainImage = cv2.imread(currencyTrainImagePath, cv2.IMREAD_GRAYSCALE)
                 self.__getFeatures(currencyTrainImage)
-                data.append([currencyTrainImage, (
-                    self.kp, self.des)])
+                data.append([currencyTrainImage, (self.kp, self.des)])
             self.cache[currencyValue] = data
 
     def __getFeatures(self, image):
-        """[Uses ORB to detect keypoints and BEBLID to compute the image]
-
-        Args:
-            image ([cv2.img]): [Image for detecting and computing keypoints]
-        """
-        start = time.time()
         self.image = image
         keypoints = self.featureExtractor.detect(self.image, None)
-        self.kp, self.des = self.featureExtractor.compute(
-            self.image, keypoints)
-
-        end = time.time()
+        self.kp, self.des = self.featureExtractor.compute(self.image, keypoints)
 
     def __filterFalsePositives(self, foundMatchings):
-        self.foundMatchings = foundMatchings
-        if not self.foundMatchings:
+        if not foundMatchings:
             return []
-
-        self.good = []
+        good = []
         try:
-            for m, n in self.foundMatchings:
+            for m, n in foundMatchings:
                 if m.distance < 0.7 * n.distance:
-                    self.good.append(m)
-
+                    good.append(m)
         except ValueError:
             pass
-        return self.good
+        return good
 
     def __getMatchingPoints(self, queryImageDes, trainImageDes):
-        """[
-            Matches the queryimage description with trainimage descrption using KNN Matching.
-        ]
-
-        Args:
-            queryImageDes ([array]): [Description of the image frame from the video stream which is to be detected]
-            trainImageDes ([array]]): [Description of the training images]
-
-        Returns:
-            [list]: [List of Matching Points]
-        """
-        start = time.time()
-        self.queryImageDes = queryImageDes
-        self.trainImageDes = trainImageDes
-        if self.queryImageDes is None or len(self.queryImageDes) == 0:
+        if queryImageDes is None or len(queryImageDes) == 0 or trainImageDes is None or len(trainImageDes) == 0:
             return []
-        if self.trainImageDes is None or len(self.trainImageDes) == 0:
-            return []
-        end = time.time()
-        # print('[DEBUG] Get Matching Points :', end-start)
         try:
-            return self.__filterFalsePositives(self.matcher.knnMatch(self.queryImageDes, self.trainImageDes, k=2))
+            return self.__filterFalsePositives(self.matcher.knnMatch(queryImageDes, trainImageDes, k=2))
         except cv2.error:
-            pass
+            return []
 
     def __buildHomographyInputData(self):
-        """[Builds Homography Data]
-        """
         if not (self.maxMatchingsData is None):
             queryImageData = self.maxMatchingsData[1]
             self.queryImageKeypoints = queryImageData[1][0]
@@ -146,8 +121,6 @@ class Detector:
             self.queryImageShape = queryImageData[0].shape
 
     def __guessCurrency(self):
-        """[Guesses the Currency in video stream]
-        """
         try:
             self.maxMatchingsCurrency = 0
             self.maxMatchings = 0
@@ -159,8 +132,7 @@ class Detector:
             for currencyValue, images in self.cache.items():
                 totalMatches = 0
                 for imageData in images:
-                    matches = self.__getMatchingPoints(
-                        imageData[1][1], self.des)
+                    matches = self.__getMatchingPoints(imageData[1][1], self.des)
                     countMatches = len(matches)
 
                     if countMatches > self.maxMatchings:
@@ -175,28 +147,31 @@ class Detector:
             if not (self.maxMatchingsCurrency is None) and self.maxMatchings > MIN_MATCH_COUNT:
                 self.detectedCurrency = self.maxMatchingsCurrency
                 self.maxMatching = self.maxMatchings
-            self.homographyData = (self.queryImageShape,
-                                   self.queryImageKeypoints, self.kp, self.matches)
-            self.matchingSummary = self.matchesSummary
-            
+                
         except Exception as error:
             pass
 
-
     def detect(self):
-        """[Detects the currency in the Video Stream]
-        """
-        self.frame = self.videoCapture.read()
-        self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
-        self.__guessCurrency()
-        if DEBUG:
-            cv2.imshow("frame", self.frame)
-        self.fps.update()
-        
+        frame = self.videoCapture.read()
+        if frame is not None:
+            self.frame = frame
+            self.color_frame = self.frame.copy()
+            self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+            self.__guessCurrency()
+            
+            if self.detectedCurrency:
+                cv2.putText(self.color_frame, f"Currency: {self.detectedCurrency} Rupees", 
+                           (10, 30), cv2.FONT_HERSHEY_SIMPLEX, FONT_SCALE, TEXT_COLOR, FONT_THICKNESS)
+                cv2.putText(self.color_frame, f"Confidence: {self.maxMatching}", 
+                           (10, 70), cv2.FONT_HERSHEY_SIMPLEX, FONT_SCALE, TEXT_COLOR, FONT_THICKNESS)
+            
+            cv2.imshow(WINDOW_NAME, self.color_frame)
+            cv2.waitKey(1)
+            self.fps.update()
+            return True
+        return False
 
     def stop(self):
-        """[Exits the Currency Detector]
-        """
         self.fps.stop()
         self.videoCapture.stop()
         cv2.destroyAllWindows()

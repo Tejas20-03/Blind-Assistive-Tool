@@ -1,38 +1,59 @@
 import cv2
 from threading import Thread, Lock
+from Detection.config import *
 
 class Stream:
-    def __init__(self, src=1):
-        # Initialize the video camera stream and read the first frame from the stream
-        self.stream = cv2.VideoCapture(src)
+    def __init__(self, src=0):
+        self.stream = cv2.VideoCapture(src, cv2.CAP_DSHOW)
+        
+        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
+        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
+        self.stream.set(cv2.CAP_PROP_FPS, CAMERA_FPS)
+        
         (self.grabbed, self.frame) = self.stream.read()
-        # Initialize the variable used to indicate if the thread should be stopped
         self.stopped = False
         self.lock = Lock()
+        
+        self.fps = 0
+        self.frame_count = 0
+        self.start_time = cv2.getTickCount()
 
     def start(self):
-        # Start the thread to read frames from the video stream
-        Thread(target=self.update, args=()).start()
+        Thread(target=self.update, args=(), daemon=True).start()
         return self
 
     def update(self):
-        # Keep looping infinitely until the thread is stopped
         while True:
-            # If the thread indicator variable is set, stop the thread
             if self.stopped:
                 return
-            # Otherwise, read the next frame from the stream
+
             grabbed, frame = self.stream.read()
+            
+            self.frame_count += 1
+            if self.frame_count % 30 == 0:
+                current_time = cv2.getTickCount()
+                self.fps = 30 * cv2.getTickFrequency() / (current_time - self.start_time)
+                self.start_time = current_time
+
             with self.lock:
                 self.grabbed = grabbed
-                self.frame = frame
+                if grabbed:
+                    self.frame = frame
 
     def read(self):
-        # Return the frame most recently read
         with self.lock:
             return self.frame
 
+    def get_fps(self):
+        return self.fps
+
     def stop(self):
-        # Indicate that the thread should be stopped and release the stream resource
         self.stopped = True
-        self.stream.release()
+        if self.stream.isOpened():
+            self.stream.release()
+
+    def is_stopped(self):
+        return self.stopped
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.stop()

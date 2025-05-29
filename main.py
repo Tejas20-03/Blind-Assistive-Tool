@@ -51,18 +51,16 @@ def takeCommand():
     return query.lower()
 
 if __name__ == "__main__":
-    currencyRecognition()
     speak('Welcome to Beyond Vision')
     speak('An Assistive tool for Blind Persons')
 
-    speak('This Smart Glasses contains features like navigation, object detection and avoidance, remote monitoring, currency detection and other numerous features')
+    speak('Beyond Vision contains features like navigation, object detection and avoidance, remote monitoring, currency detection and other numerous features')
     speak('You can access these features by saying the following commands:')
     speak('say navigate to start autonomous movement')
     speak('say remote monitoring to start remote monitoring')
     speak('say detect currency to identify the currency')
     speak('say detect surrounding to detect the objects in front of you')
- 
-    speak('or you can say hello to interact with Glasses')
+
 
     while True:
         query = takeCommand()
@@ -76,38 +74,8 @@ if __name__ == "__main__":
         elif 'detect currency' in query:
             speak("Currency Detection Activated")
             currencyRecognition()
-            
-        elif 'read text' in query:
-            speak('Text Reader Activated')
-            imagetotext()
         
         elif 'detect surrounding' in query:
             speak('Scene Detection activated')
             sceneDetection()
             
-        elif "hello" in query:
-            from GreetMe import greetMe
-            greetMe()
-    
-            while True:
-                query = takeCommand()
-                if "go to sleep" in query:
-                    speak("Ok sir! You can call me anytime")
-                    break
-                elif "hello" in query:
-                    speak("Hello sir, how are you?")
-                elif "i am fine" in query:
-                    speak("That's great sir")
-                elif "how are you" in query:
-                    speak("Perfect, sir")
-                elif "thank you" in query:
-                    speak("You are welcome, sir")
-                elif "google" in query:
-                    from SearchNow import searchGoogle
-                    searchGoogle(query)
-                elif "youtube" in query:
-                    from SearchNow import searchYoutube
-                    searchYoutube(query)
-                elif "wikipedia" in query:
-                    from SearchNow import searchWikipedia
-                    searchWikipedia(query)
